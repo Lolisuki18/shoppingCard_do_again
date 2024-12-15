@@ -18,3 +18,6 @@
   "files": ["src/type.d.ts"], // các file dùng để defined global type cho dự án
   "include": ["src/**/*"] //đường dẫn include cho các file cần bulid
 }
+
+
+//thử nè
