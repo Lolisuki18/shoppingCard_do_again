@@ -1,0 +1,4 @@
+# cài extensions EditorConfig cho VS CODE
+
+indent_size = 2;
+indent_style = space;
