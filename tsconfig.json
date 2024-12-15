@@ -1,0 +1,20 @@
+{
+  "compilerOptions": {
+    "module": "CommonJS", //Quy định output của module đuọc sử dụng sẽ là CommonJS chứ thật ra mình sẽ sử dụng express JS để làm
+    "moduleResolution": "node",
+    "target": "ES2020", //Tager output cho code
+    "outDir": "dist", //Đường dẫn ouput cho thư mục build
+    "esModuleInterop": true /* Emit additional JavaScript to ease support for importing CommonJS modules. This enables 'allowSyntheticDefaultImports' for type compatibility. */,
+    "strict": true, //Enable all strict type-checking options.
+    "skipLibCheck": true, //skip type checking all .d.ts files
+    "baseUrl": ".", //đường dẫn base cho các import
+    "paths": {
+      "~/*": ["src/*"] // Đường dẫn tương đối cho các import (alias)
+    }
+  },
+  "ts-node": {
+    "require": ["tsconfig-paths/register"]
+  },
+  "files": ["src/type.d.ts"], // các file dùng để defined global type cho dự án
+  "include": ["src/**/*"] //đường dẫn include cho các file cần bulid
+}
