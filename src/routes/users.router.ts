@@ -1,5 +1,7 @@
 //khai báo express
 import express from 'express'
+import { registerController } from '~/controllers/users.controllers'
+import { wrapAsync } from '~/utils/handlers'
 //tạo router
 const usersRouter = express.Router() // khai báo router
 
@@ -27,4 +29,5 @@ usersRouter.get('/get-me', (req, res) => {
   })
 })
 
+usersRouter.post('/register', registerController)
 export default usersRouter
