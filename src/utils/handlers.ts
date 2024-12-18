@@ -14,3 +14,13 @@ export const wrapAsync = <P, T>(func: RequestHandler<P, any, any, T>) => {
     }
   }
 }
+
+//giải thích ý nghĩa
+/*
+  wrapAsync(registerController) chạy thì nó sẽ return ra 1 request handler
+  và cái route /register của mình sẽ chạy cái request handler giả đó 
+  và request handler giả đó đó sẽ chạy registerController mình đã truyền vào 
+  và bắt lỗi giúp mình ->nếu có lỗi thì nó chạy vào default error handler trên app handler mình đã tạo ra 
+  
+
+*/

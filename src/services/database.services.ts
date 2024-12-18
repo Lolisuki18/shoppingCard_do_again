@@ -3,6 +3,7 @@ import { Collection, Db, MongoClient } from 'mongodb'
 //npm i dotenv : dùng để tải thử viện để xài .env
 import dotenv from 'dotenv'
 import User from '~/models/schema/User.schema'
+import RefreshToken from '~/models/schema/RefreshToken.schema'
 dotenv.config() //kích hoạt liên kết env
 const uri = `mongodb+srv://${process.env.DB_USERNAME}:${process.env.DB_PASSWORD}@shoppingcard.nlpfy.mongodb.net/?retryWrites=true&w=majority&appName=shoppingCard`
 //phải giấu userName và password vào file env để khi đẩy lên git nó sẽ ko bị lộ
@@ -41,6 +42,11 @@ class DatabaseService {
     return this.db.collection(process.env.DB_USERS_COLLECTION as string)
     //vào db lấy ra collection users, và vì chuỗi truyền vào óc thể là
     //underfind nên mình phải ràng buộc nó là string
+  }
+  //method này trả về 1 collection chứa các object RefreshToken
+  //RefreshToken là class mà ta đã tạo trước đó
+  get refreshTokens(): Collection<RefreshToken> {
+    return this.db.collection(process.env.DB_REFRESH_TOKENS_COLLECTION as string) // users là tên của collection
   }
 }
 
