@@ -6,7 +6,7 @@ import User from '~/models/schema/User.schema'
 import databaseService from '~/services/database.services'
 import { json, NextFunction, Request, Response } from 'express'
 import { ParamsDictionary } from 'express-serve-static-core'
-import { LoginReqBody, RegisterReqBody } from '~/models/schema/requests/Users.requests'
+import { LoginReqBody, LogoutReqBody, RegisterReqBody, TokenPayLoad } from '~/models/schema/requests/Users.requests'
 import usersService from '~/services/users.services'
 import { ErrorWithStatus } from '~/models/Errors'
 import HTTP_STATUS from '~/constants/httpStatus'
@@ -113,5 +113,37 @@ export const loginController = async (
     //ok là 200
     message: USERS_MESSAGES.LOGIN_SUCCESS,
     result: result
+  })
+}
+
+export const logoutController = async (
+  req: Request<ParamsDictionary, any, LogoutReqBody>,
+  res: Response,
+  next: NextFunction
+) => {
+  //lấy refre-token từ req.body
+  const { refresh_token } = req.body
+  //lấy user_id từ req.decode_authorizaton và decode_refresh_token
+
+  const { user_id: user_id_at } = req.decode_authorization as TokenPayLoad
+  const { user_id: user_id_rf } = req.decode_refresh_token as TokenPayLoad
+
+  //nếu thông tin từ 2 jwwt k cùng 1 user_id thì lỗi
+  if (user_id_at !== user_id_rf) {
+    throw new ErrorWithStatus({
+      message: USERS_MESSAGES.REFRESH_TOKEN_IS_INVALID,
+      status: HTTP_STATUS.UNAUTHORIZED
+    })
+  }
+  //nếu cùng thì kiểm tra xem
+  //refresh token này có trong db và thuộc user_id_at ko ?-> nếu ko thì trả lỗi ra trong này luôn
+  await usersService.checkRefreshToken({
+    user_id: user_id_at,
+    refresh_token
+  })
+  //nếu có thì xoá nó đi
+  const result = await usersService.logout(refresh_token) //hàm này chưa làm
+  res.status(HTTP_STATUS.OK).json({
+    message: USERS_MESSAGES.LOGOUT_SUCCESS
   })
 }

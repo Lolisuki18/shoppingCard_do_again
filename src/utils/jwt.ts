@@ -4,6 +4,7 @@
 
 import jwt from 'jsonwebtoken'
 import dotenv from 'dotenv'
+import { TokenPayLoad } from '~/models/schema/requests/Users.requests'
 // import { TokenPayLoad } from '~/models/requests/User.requests'
 dotenv.config()
 //jwt.SignOptions giá trị mặc định
@@ -54,12 +55,12 @@ export const signToken = ({
 //làm hàm giúp kiểm tra 1 token có đúng với chữ ký hay không ?
 //nếu đúng thì trả ra payload đang có trong token đó
 
-// export const verifyToken = ({ token, privateKey }: { token: string; privateKey: string }) => {
-//   return new Promise<TokenPayLoad>((resolve, reject) => {
-//     jwt.verify(token, privateKey, (error, decode) => {
-//       if (error) throw reject(error)
-//       else return resolve(decode as TokenPayLoad)
-//     })
-//   })
-// }
+export const verifyToken = ({ token, privateKey }: { token: string; privateKey: string }) => {
+  return new Promise<TokenPayLoad>((resolve, reject) => {
+    jwt.verify(token, privateKey, (error, decode) => {
+      if (error) throw reject(error)
+      else return resolve(decode as TokenPayLoad)
+    })
+  })
+}
 // //decode chính là payload

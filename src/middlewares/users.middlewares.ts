@@ -1,8 +1,13 @@
 // import các interface để định dạng kiểu cho para của middlewares
 import { Request, Response, NextFunction } from 'express'
 import { checkSchema } from 'express-validator'
+import { JsonWebTokenError } from 'jsonwebtoken'
+import { capitalize } from 'lodash'
+import HTTP_STATUS from '~/constants/httpStatus'
 import { USERS_MESSAGES } from '~/constants/messages'
+import { ErrorWithStatus } from '~/models/Errors'
 import usersService from '~/services/users.services'
+import { verifyToken } from '~/utils/jwt'
 import { validate } from '~/utils/validation'
 
 //1 req của clinet gửi lên server sẽ có body (chứa các thứ cần gửi )
@@ -151,6 +156,85 @@ export const registerValidator = validate(
             strictSeparator: true
           },
           errorMessage: USERS_MESSAGES.DATE_OF_BIRTH_BE_ISO8601
+        }
+      }
+    },
+    ['body']
+  )
+)
+
+export const accessTokenValidation = validate(
+  checkSchema(
+    {
+      Authorization: {
+        trim: true,
+        notEmpty: {
+          errorMessage: USERS_MESSAGES.ACCESS_TOKEN_IS_REQUIRED
+        },
+        custom: {
+          options: async (value, { req }) => {
+            //value này 'Bearer <access_token>'
+            const access_token = value.split(' ')[1] // có trường hợp người dùng chỉ người chữ bearer à ko gửi accesstoken
+            // sẽ bị null -> sẽ bị cash hệ thống
+            if (!access_token) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.UNAUTHORIZED, //401
+                message: USERS_MESSAGES.ACCESS_TOKEN_IS_REQUIRED
+              })
+            }
+            //mình phải try catch -> để đổi mã lỗi của nó thành 401 -> chụp nó lại đổi mã rồi ném lại ra
+            try {
+              // nếu có mã thì mình sẽ verify(xác thực chữ ký)
+              const decode_authoriation = await verifyToken({
+                token: access_token,
+                privateKey: process.env.JWT_SECRET_ACCESS_TOKEN as string
+              })
+              //decode_authoriation là payload của access_token đã mã hoá
+              //bên trong đó có user_id và token_type....
+              ;(req as Request).decode_authorization = decode_authoriation
+              //dùng để lưu nó lại vì khi hàm chạy xong thì nó sẽ mất -> mình cần phải lưu nó lại đê dùng ở các tầng sau
+            } catch (error) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.UNAUTHORIZED, //401
+                message: capitalize((error as JsonWebTokenError).message)
+              })
+            }
+            //nếu ok hêt
+            return true
+          }
+        }
+      }
+    },
+    ['headers']
+  )
+)
+
+export const refreshTokenValidator = validate(
+  checkSchema(
+    {
+      refresh_token: {
+        //vô là kiểm tra
+        notEmpty: {
+          errorMessage: USERS_MESSAGES.REFRESH_TOKEN_IS_REQUIRED
+        },
+        trim: true,
+        custom: {
+          options: async (value, { req }) => {
+            //value này là refreshToken
+            try {
+              const decode_refresh_token = await verifyToken({
+                token: value,
+                privateKey: process.env.JWT_SECRET_REFRESH_TOKEN as string
+              })
+              ;(req as Request).decode_refresh_token = decode_refresh_token
+            } catch (error) {
+              throw new ErrorWithStatus({
+                status: HTTP_STATUS.UNAUTHORIZED, //401
+                message: capitalize((error as JsonWebTokenError).message)
+              })
+            }
+            return true
+          }
         }
       }
     },

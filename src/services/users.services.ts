@@ -87,6 +87,25 @@ class UsersService {
     )
     return { access_token, refresh_token }
   }
+  //check refresh token
+  async checkRefreshToken({ user_id, refresh_token }: { user_id: string; refresh_token: string }) {
+    const refreshToken = await databaseService.refreshTokens.findOne({
+      user_id: new ObjectId(user_id),
+      token: refresh_token
+    })
+    if (!refreshToken) {
+      throw new ErrorWithStatus({
+        status: HTTP_STATUS.UNAUTHORIZED, //401
+        message: USERS_MESSAGES.REFRESH_TOKEN_IS_INVALID
+      })
+    }
+    return refreshToken
+  }
+
+  //log out
+  async logout(refresh_token: string) {
+    await databaseService.refreshTokens.deleteOne({ token: refresh_token })
+  }
 }
 const usersService = new UsersService()
 export default usersService

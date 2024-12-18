@@ -1,7 +1,12 @@
 //khai báo express
 import express from 'express'
-import { loginController, registerController } from '~/controllers/users.controllers'
-import { loginValidator, registerValidator } from '~/middlewares/users.middlewares'
+import { loginController, logoutController, registerController } from '~/controllers/users.controllers'
+import {
+  accessTokenValidation,
+  loginValidator,
+  refreshTokenValidator,
+  registerValidator
+} from '~/middlewares/users.middlewares'
 import { wrapAsync } from '~/utils/handlers'
 //tạo router
 const usersRouter = express.Router() // khai báo router
@@ -65,13 +70,32 @@ usersRouter.post('/register', registerValidator, wrapAsync(registerController))
 
 /*
 Description: login
-path: /users/login
+path: /user/login
 methods: post
 body: {email,password}
 */
 usersRouter.post('/login', loginValidator, wrapAsync(loginController))
 export default usersRouter
 
+/*
+  Description: logout
+  path: user/logout
+  method: POST
+  header: {Authorization: Bearer <access_token>}
+  body:{refresh_token: string}
+
+
+  logout phải là method post vì
+
+  khi logout, người dùng sẽ cung cấp lại
+  at và rf để xác minh họ là ai, sau đó mình sẽ thu hồi (xóa khỏi hệ thống) rf của họ
+
+  vậy nên ta tạo logout với method post với
+  header: Authorization: Bear access_token (dùng để biết account nào muốn logout)
+  và body:{refresh_token} (dùng để xóa token trong collection refresh_tokens)
+ */
+
+usersRouter.post('/logout', accessTokenValidation, refreshTokenValidator, wrapAsync(logoutController))
 //ta có thể thấy rằng bản chất của middleware và controller đều là request handler
 
 //Erorr handler

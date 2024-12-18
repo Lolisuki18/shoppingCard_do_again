@@ -6,7 +6,7 @@ const app = express() // dùng express tạo 1 server
 const port = 3000 // server sẽ chạy trên cổng port 3000
 databaseService.connect()
 app.use(express.json()) // cho sever xài 1 middleware biến đổi json -> ko có cái này sẽ bị biến thành undefined
-app.use('/user', usersRouter) // app sẽ sử dụng bô route của userRouter
+app.use('/users', usersRouter) // app sẽ sử dụng bô route của userRouter
 
 //app tổng sẽ dùng usersRouter trên nên ta sẽ có 1 đường dẫn là /user/get-me
 // nên lúc muốn xài api /get-me thì ta phải truy cập bằng
